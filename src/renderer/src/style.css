@@ -1,0 +1,19 @@
+* {
+  font-family: SimSun,SimHei,"Apple LiSung Light";
+  font-size: 12px;
+  /* font-smooth: never; */
+  /* -webkit-font-smoothing : none; */
+  /* font-weight: 400; */
+  padding: 0;
+  margin: 0;
+}
+
+:root {
+  --cd0: #ffffff;
+  --cd1: #d6d3ce;
+  --cd2: #848284;
+  --cd3: #424142;
+  --cd4: #17246b;
+  --cd_desktop: #396ca5;
+
+}
