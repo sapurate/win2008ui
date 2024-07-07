@@ -1,34 +1,32 @@
-# electron-app
+## 说明
+1. 创建项目
+    > npm init -y
+2. 配置
+3. 运行
 
-An Electron application with Vue
+## 技术栈
 
-## Recommended IDE Setup
+## 创建
+1. 安装Vite
+首先，确保你的系统中已安装了Node.js（推荐使用LTS版本）。然后，通过yarn全局安装Vite：
+    >yarn global add create-vite
+2. 创建Vite项目
+    >create-vite win2008ui --template vue
+    >cd win2008ui
+    >yarn add element-plus
+3. 配置vite.config.js文件
+    打开vite.config.js文件，在里面配置Vite插件以支持Element Plus
+    import { defineConfig } from 'vite'
+    import vue from '@vitejs/plugin-vue'
+    import { createHtmlPlugin } from 'vite-plugin-html'
+    import elementPlus from 'vite-plugin-element-plus'
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+4. 配置main.js文件
+    >import ElementPlus from 'element-plus'
+    >import 'element-plus/dist/index.css'
+    >const app = createApp(App)
+    >app.use(ElementPlus)
 
-## Project Setup
-
-### Install
-
-```bash
-$ npm install
-```
-
-### Development
-
-```bash
-$ npm run dev
-```
-
-### Build
-
-```bash
-# For windows
-$ npm run build:win
-
-# For macOS
-$ npm run build:mac
-
-# For Linux
-$ npm run build:linux
-```
+5. 开发与构建
+    yarn dev
+## 运行
