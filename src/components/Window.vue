@@ -1,6 +1,6 @@
 <template>
-  <div id="dragAssembly" class="shadow-window" :class="{max: isMax}" ref="dragBox" :style="{ width: w, height: h }">
-    <div id="dragHeader" @mousedown.stop="mouseDownHandler">
+  <div id="dragAssembly"  class="shadow-window" :class="{max: isMax}" ref="dragBox" :style="{ width: w, height: h }">
+    <div id="dragHeader" >
       <span class="dragTitle">{{ title }}</span>
       <div class="btn-group">
         <div class="el-icon-close shadow-btn" @click="max">-</div>
@@ -67,60 +67,37 @@ export default {
   },
   computed: {},
   created() {},
-  mounted() {},
-  methods: {
-    mouseDownHandler(e) {
-      // 获取元素当前位置
-      this.currentPosition = {
-        x: this.$refs.dragBox.offsetLeft,
-        y: this.$refs.dragBox.offsetTop,
-      };
-  
-      // 获取移动开始位置
-      this.startPosition = {
-        x: e.clientX,
-        y: e.clientY,
-      };
-  
-      // 设置为true，允许移动
-      this.isMove = true;
-  
-      this.dragAssembly = document.getElementById("dragAssembly");
-  
-      // 鼠标移动事件
-      this.dragAssembly.addEventListener("mousemove", this.mouseMoveHandler);
-      // 鼠标抬起事件
-      this.dragAssembly.addEventListener("mouseup", (e) => {
-        this.isMove = false;
-        this.dragAssembly.removeEventListener(
-          "mousemove",
-          this.mouseMoveHandler
-        );
-      });
-      // 鼠标移出事件
-      this.dragAssembly.addEventListener("mouseleave", (e) => {
-        this.isMove = false;
-        this.dragAssembly.removeEventListener(
-          "mousemove",
-          this.mouseMoveHandler
-        );
-      });
-    },
-  
-    // 鼠标移动事件
-    mouseMoveHandler(e) {
-      if (!this.isMove) {
-        return;
+  mounted() {
+    // 获取盒子
+    var box = document.getElementById('dragAssembly');
+    // 获取盒子标题区块
+    var drop = document.getElementById('dragHeader');
+    drop.onmousedown = function (e) {
+      // 兼容性处理
+      var e = e || window.event;
+      // 当鼠标在盒子标题区域按下的时候,获取鼠标在盒子里面的下标
+      // 鼠标在盒子的下标 = 鼠标在页面的的下标 - 盒子的偏移量;
+      var x = e.pageX - box.offsetLeft;
+      var y = e.pageY - box.offsetTop;
+      console.log(x + " " + y);
+      document.onmousemove = function (e) {
+        // 兼容性处理
+        var e = e || window.event;
+        // 当鼠标在页面上移动的时候。求盒子的坐标
+        // 盒子的坐标 = 鼠标当前在页面中的位置 - 鼠标在盒子中的位置
+        var boxX = e.pageX - x;
+        var boxY = e.pageY - y;
+        box.style.left = boxX + "px";
+        box.style.top = boxY + "px";
       }
-  
-      // 获取鼠标移动的距离
-      const nowX = e.clientX - this.startPosition.x,
-        nowY = e.clientY - this.startPosition.y;
-  
-      // 计算并设置移动后的位置
-      this.$refs.dragBox.style.left = `${this.currentPosition.x + nowX}px`;
-      this.$refs.dragBox.style.top = `${this.currentPosition.y + nowY}px`;
-    },
+    }
+    // 当鼠标在页面文档中弹起,移除移动跟随
+    document.onmouseup = function () {
+      document.onmousemove = null;
+    }
+  },
+  methods: {
+
   
     // 关闭窗口
     close() {

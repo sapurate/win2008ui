@@ -4,7 +4,7 @@
     <el-footer id="taskbar">
         <!-- 开始菜单 -->
         <div id="start_menu" class="taskbar-btn active" style="background-image: url('/ico/start_menu.png');"></div>
-        <div class="taskbar-btn">de </div>
+        <div class="taskbar-btn" @click="open_app('')">de </div>
         <!-- 任务栏的图标 -->
         <div id="taskbar_app_ground" v-for="item in appList">
             <div class="taskbar-btn" v-if="item.taskbar" :title="item.name"
@@ -12,6 +12,9 @@
         </div>
         </div>
     </el-footer>
+    <template v-for="appVue in appVueList">
+        <component :is="appVue.name" title="窗口111" :app="appVue" />
+    </template>
     <Window
         ref="dragAssembly"
         w="800px"
@@ -41,6 +44,16 @@ const appList = ref([
     {'name': 'explorer', 'icon': '/ico/clock.ico', 'url': '/ico/explorer.ico', 'taskbar': true, 'desktop': true, 'isOpen': false},
     {'name': 'explorer', 'icon': '/ico/emms.ico', 'url': '/ico/explorer.ico', 'taskbar': true, 'desktop': true, 'isOpen': false},
 ]);
+
+const appVueList = ref([] as any);
+
+// 打开应用
+const open_app= (app: string) => {
+    let APP = Window();
+    appVueList.value.push(APP);
+    // app.isOpen = true;
+    // active_app.value = app.name;
+}
 </script>
 
 <style lang="less">

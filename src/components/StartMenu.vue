@@ -51,7 +51,7 @@ const app_data = [
 ]
 
 const user_name = ref('')
-const openedApps = ref([])
+const openedApps = ref([] as any)
 
 const search_app_input = ref('')
 const logout = () => {
@@ -76,7 +76,7 @@ const logout = () => {
     height: 612px;
     box-sizing: border-box;
     z-index: 99;
-    font-size: medium;
+    font-size: 12px;
     .lr-box {
         flex: 1;
         border-bottom: solid 1px var(--cd2);
@@ -120,7 +120,7 @@ const logout = () => {
             }
         };
         .r-box {
-            flex: 1;
+            width: 150px;
             display: flex;
             flex-direction: column;
             border-left: solid 1px var(--cd0);
