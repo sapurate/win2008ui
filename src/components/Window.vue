@@ -1,136 +1,148 @@
 <template>
-  <div id="dragAssembly"  class="shadow-window" :class="{max: isMax}" ref="dragBox" :style="{ width: w, height: h }">
-    <div id="dragHeader" >
-      <span class="dragTitle">{{ title }}</span>
+  <div :id="appName+'Window'" id="dragAssembly"  class="dragAssembly shadow-window" 
+    :class="{max: isMax, activate: opened_app_list[opened_app_list.length-1]==appName}" 
+    :style="{ width: w, height: h, zIndex: opened_app_list.indexOf(appName)+70, 
+
+  }">
+    
+    <div :id="appName+'Header'" class="dragHeader" :class="{activate: opened_app_list[opened_app_list.length-1]==appName}">
+      <span class="dragTitle"><b>{{ title }}</b></span>
       <div class="btn-group">
-        <div class="el-icon-close shadow-btn" @click="max">-</div>
-        <div class="el-icon-close shadow-btn" @click="max" style="margin-left: 3px;">◻</div>
-        <div class="el-icon-close shadow-btn" @click="close">x</div>
+        <div class="el-icon-close shadow-btn" @click="mix_app(appName)">🗕</div>
+        <div class="el-icon-close shadow-btn" @click="max" style="margin-left: 3px;">🗖</div>
+        <div class="el-icon-close shadow-btn" @click="close_app(appName)">×</div>
       </div>
     </div>
-    <div id="dragHeader2">
-      <input class="url" readonly :value="url"></input>
+    <div :id="appName+'Header2'" class="dragHeader2">
+      <input class="url" readonly :value="url + appName"></input>
       <el-button class="btn" style="margin-left: -23px; background: linear-gradient(#90CDA4, #229832, #90CDA4); border: 1px solid #B0E2BE;">
-        ♻
+        ♻︎
       </el-button>
       <input class="search shadow-window-1"></input>
-      <el-button :icon="Search" class="btn" style="margin: 0 1px; background: linear-gradient(#AEB5E4, #2650AC, #AEB5E4); border: 1px solid #CBD1FA;" >
+      <el-button class="btn" style="margin: 0 1px; background: linear-gradient(#AEB5E4, #2650AC, #AEB5E4); border: 1px solid #CBD1FA;" >
         🔍︎
       </el-button>
     </div>
-    <div id="dragBody">
+    <div :id="appName+'dragBody'" class="dragBody">
       <slot name="content"></slot>
     </div>
+  
+    <div class="unactivate" 
+      v-show="opened_app_list[opened_app_list.length-1]!=appName"
+      @click="set_active_winodw(appName)"></div>
   </div>
 </template>
    
-<script>
-import { Search } from '@element-plus/icons-vue';
+<script setup>
+import { ref, onMounted } from 'vue';
 
-export default {
-  name: "Window",
-  components: {},
-  props: {
-    title: {
-      type: String,
-      default: "",
-    },
-    w: {
-      type: String,
-      default: "700px",
-    },
-    h: {
-      type: String,
-      default: "500px",
-    },
-    url: {
-      type: String,
-      default: window.location.pathname.replace("/", ">"),
-    },
-  },
-  data() {
-    return {
-      // 是否可以移动
-      isMove: false,
-  
-      // 移动开始位置
-      startPosition: {},
-      // 元素当前位置
-      currentPosition: {},
-  
-      // 拖拽元素
-      dragHeader: null,
+// Define reactive properties
+// const isMove = ref(false);
+// const startPosition = ref({});
+// const currentPosition = ref({});
+// const dragHeader = ref(null);
+const isMax = ref(false);
 
-      // 是否最大化
-      isMax: false,
-    };
+// Props
+const props = defineProps({
+  appName: {
+    type: String,
+    default: "未定义",
   },
-  computed: {},
-  created() {},
-  mounted() {
-    // 获取盒子
-    var box = document.getElementById('dragAssembly');
-    // 获取盒子标题区块
-    var drop = document.getElementById('dragHeader');
-    drop.onmousedown = function (e) {
-      // 兼容性处理
-      var e = e || window.event;
-      // 当鼠标在盒子标题区域按下的时候,获取鼠标在盒子里面的下标
-      // 鼠标在盒子的下标 = 鼠标在页面的的下标 - 盒子的偏移量;
-      var x = e.pageX - box.offsetLeft;
-      var y = e.pageY - box.offsetTop;
-      console.log(x + " " + y);
-      document.onmousemove = function (e) {
-        // 兼容性处理
-        var e = e || window.event;
-        // 当鼠标在页面上移动的时候。求盒子的坐标
-        // 盒子的坐标 = 鼠标当前在页面中的位置 - 鼠标在盒子中的位置
-        var boxX = e.pageX - x;
-        var boxY = e.pageY - y;
-        box.style.left = boxX + "px";
-        box.style.top = boxY + "px";
-      }
-    }
-    // 当鼠标在页面文档中弹起,移除移动跟随
-    document.onmouseup = function () {
-      document.onmousemove = null;
-    }
+  w: {
+    type: String,
+    default: "800px",
   },
-  methods: {
+  h: {
+    type: String,
+    default: "600px",
+  },
+  title: {
+    type: String,
+    default: "未定义",
+  },
+  url: {
+    type: String,
+    // default: () => window.location.pathname.replace("/", ">"),
+    default: "🖥︎ ▾ 计算机 ▾ 应用 ▾ ",
+  },
+  opened_app_list: {
+    type: Array,
+    default: null,
+  },
+  set_active_winodw: {
+    type: Function,
+  },
+  mix_app: {
+    type: Function,
+  },
+  close_app: {
+    type: Function,
+  },
+});
 
-  
-    // 关闭窗口
-    close() {
-      this.$emit("close");
-    },
-
-    // 窗口最大化
-    max() {
-      if (this.isMax) {
-        this.$refs.dragBox.style.left = "50%";
-        this.$refs.dragBox.style.top = "50%";
-        this.isMax = false;
-      }else {
-        this.$refs.dragBox.style.left = "0";
-        this.$refs.dragBox.style.top = "0";
-        this.isMax = true;
-      }
-    },
-  },
+// 设定初始的left和top值，赋值后不会再变
+const startPosition = {
+  left: props.opened_app_list.indexOf(props.appName)*20,
+  top: props.opened_app_list.indexOf(props.appName)*20,
 };
+
+const max = () => {
+  const dragBox = document.getElementById(props.appName+'Window');
+  if (isMax.value) {
+    dragBox.style.left = "50%";
+    dragBox.style.top = "50%";
+    isMax.value = false;
+  } else {
+    dragBox.style.left = "0";
+    dragBox.style.top = "0";
+    isMax.value = true;
+  }
+};
+
+// Emit
+const emit = defineEmits(['close']);
+
+// Mounted hook
+onMounted(() => {
+  const box = document.getElementById(props.appName+'Window');
+  const drop = document.getElementById(props.appName+'Header');
+  let x, y;
+
+  drop.addEventListener('mousedown', (e) => {
+      // 如果现在是最大化状态，拖动标题栏将缩小
+    if (isMax.value) { return };
+    x = e.pageX - box.offsetLeft;
+    y = e.pageY - box.offsetTop;
+    document.addEventListener('mousemove', moveBox);
+  });
+
+  document.addEventListener('mouseup', () => {
+    document.removeEventListener('mousemove', moveBox);
+  });
+
+  const moveBox = (e) => {
+    box.style.left = `${e.pageX - x}px`;
+    box.style.top = `${e.pageY - y}px`;
+  };
+});
 </script>
   
 <style scoped lang="less">
-#dragAssembly {
+* {
+  font-size: 13px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.dragAssembly {
   position: fixed;
   flex-direction: column;
   display: flex;
-  left: 50%;
-  top: 50%;
-  z-index: 98;
+  left: calc(50% + v-bind('startPosition.left')*1px);
+  top: calc(50% + v-bind('startPosition.top')*1px);;
+  // z-index: 97;
   transform: translate(-50%, -50%);
   background-color: var(--cd1);
-  color: #fff;
   border: 1px solid var(--cd1);
   padding: 1px;
   &.max {
@@ -142,20 +154,25 @@ export default {
     left: 0;
     right: 0;
     bottom: 42px;
-  }
+  };
   
-  #dragHeader {
+  .dragHeader {
     width: 100%;
     height: 21px;
+    line-height: 21px;
     display: flex;
     align-items: center;
-    
     justify-content: space-between;
     box-sizing: border-box;
-    background: linear-gradient(to right, #17246b, #A6CAF0);
+    background: linear-gradient(to right, #808080, #C1C0BE);
     padding: 0px 5px;
     position: relative;
     cursor: default;
+    color: #D3D0CB;
+    &.activate {
+      background: linear-gradient(to right, #17246b, #A6CAF0);
+      color: #fff;
+    }
   
     .dragTitle {
       font-size: 13px;
@@ -169,7 +186,7 @@ export default {
     .el-icon-close {
       background-color: var(--cd1);
       color: #000;
-      line-height: 10px;
+      line-height: 13px;
       height: 13px;
       width: 14px;
       margin-left: 5px;
@@ -177,7 +194,7 @@ export default {
     }
   };
 
-  #dragHeader2 {
+  .dragHeader2 {
     width: 100%;
     height: 36px;
     display: flex;
@@ -220,12 +237,22 @@ export default {
     }
   };
   
-  #dragBody {
+  .dragBody {
     width: 100%;
     flex: 1;
     background-color: var(--cd0);
     box-sizing: border-box;
     // border-left: 1px solid var(--cd1);
   }
+}
+
+.unactivate {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  // z-index: 98;
+  // background-color: rgba(0, 0, 0, 0.5);
 }
 </style>
