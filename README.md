@@ -32,4 +32,5 @@
 
 5. 开发与构建
     yarn dev
-## 运行
+## 运行截图
+![微信截图_20240713085742](https://github.com/user-attachments/assets/ee1aeb73-e6e9-41cc-9bba-d297e8e6c0f4)
