@@ -1,27 +1,45 @@
 <template>
 <el-container id="desktop">
-    <el-main id="wallpaper">
-        opened_app_list: {{ opened_app_list }}<br>
-
+    <!-- 桌面 -->
+    <el-main id="wallpaper" @click="selected_app=''">
+        <div class="desktop_app" v-for="appName in desktop_app_list" :class="{ selected: selected_app == appName }"
+            @click.stop="selected_app=appName" @dblclick="open_app(appName)" >
+            <img :src="appList[appName].icon"/>
+            <a>{{ appList[appName].zhName }}</a>
+        </div>
+        <!-- {{ selected_app }} -->
     </el-main>
     <el-footer id="taskbar">
         <!-- 开始菜单 -->
-        <div id="start_menu" class="taskbar-btn active" style="background-image: url('/ico/start_menu.png');"></div>
+        <div id="start_menu" class="taskbar-btn active" style="background-image: url('/ico/start_menu.png');"
+            @click="switch_menu_show"></div>
         <div class="taskbar-btn" @click="open_app('dd')">de </div>
         <!-- 任务栏的图标 -->
-        <div id="taskbar_app_ground" v-for="item,appName in appList">
-            <div class="taskbar-btn" v-if="item.taskbar" :title="appName"
-            @click="open_app(appName)" :class="{ opened: opened_app_list.indexOf(appName) != -1, active: item.show }"
-            :style="{backgroundImage: 'url('+item.icon+')',backgroundSize: '32px 32px'}">
-        </div>
+        <div id="taskbar_app_ground">
+            <!-- 遍历固定的任务栏图标 -->
+            <template v-for="appName in taskbar_app_list">
+            <div class="taskbar-btn" :title="appName"
+                @click="open_app(appName)" :class="{ opened: opened_app_list.indexOf(appName) != -1, active: appList[appName].show }"
+                :style="{backgroundImage: 'url('+appList[appName].icon+')',backgroundSize: '32px 32px'}">
+            </div>
+            </template>
+            <!-- 打开的应用 -->
+            <!-- 遍历打开的应用 -->
+            <template v-for="appName in opened_app_list">
+            <div class="taskbar-btn" v-if="taskbar_app_list.indexOf(appName) == -1" :title="appName"
+                @click="open_app(appName)" :class="{ opened: opened_app_list.indexOf(appName) != -1, active: appList[appName].show }"
+                :style="{backgroundImage: 'url('+appList[appName].icon+')',backgroundSize: '32px 32px'}">
+            </div>
+            </template>
         </div>
     </el-footer>
 
     <!-- 应用窗口 -->
     <template v-for="item,appName in appList">
     <component 
-        v-if="item.content" :mix_app="mix_app" :close_app="close_app"
+        v-if="item.content" :mix_app="mix_app" :close_app="close_app" :vuePath="item.vuePath"
         :is="item.content" :title="item.zhName" :appName="appName" v-show="item.show"
+        :url="item.iframeUrl"
         :opened_app_list="opened_app_list" :set_active_winodw="set_active_window"
     />
     </template>
@@ -33,7 +51,7 @@
         @close="show_window=false"
         v-show="show_window">
     </Window> -->
-    <StartMenu v-show="show_start_menu" />
+    <StartMenu v-show="show_start_menu" :switch_menu_show="switch_menu_show"/>
 </el-container>
 </template>
 
@@ -44,29 +62,46 @@ import { ref, shallowRef, defineAsyncComponent } from "vue";
 
 // const show_window = ref(true);
 const show_start_menu = ref(false);
+// 桌面被选中的图标
+const selected_app = ref('');
 
+// 桌面图标列表
+const desktop_app_list = ref(['config', 'explorer', 'explorer1', 'emmsV2']);
+// 开始菜单图标列表
+const menu_app_list = ref(['config', 'explorer', 'explorer1', 'emmsV2']);
+// 任务栏图标列表(固定的任务栏图标，如果是临时打开的会判定opened_app_list里面有没有，有则打开，没有则新建)
+const taskbar_app_list = ref(['config', 'explorer', 'emmsV2']);
 // 打开的应用列表，只是名字，里面的顺序决定窗口的层叠顺序，最后一个为激活状态，第一个的z-index是70
 const opened_app_list = ref([] as any);
 
 // 最重要的：应用列表
 const appList = ref({
     'config': {
-        icon: '/ico/config.ico', url: '/ico/start_menu.png', zhName: "配置",
+        icon: '/ico/config.ico', url: '/ico/start_menu.png', zhName: "配置", vuePath: `jz_set`,
+        iframeUrl: '',
         taskbar: true, desktop: true, show: false, content: false
     },
     'explorer': {
-        icon: '/ico/explorer.ico', url: '/ico/explorer.ico', zhName: "浏览器",
+        icon: '/ico/explorer.ico', url: '/ico/explorer.ico', zhName: "浏览器", vuePath: `jz_set`,
+        iframeUrl: 'http://192.168.72.24',
         taskbar: true, desktop: true, show: false, content: false
     },
     'explorer1': {
-        icon: '/ico/clock.ico', url: '/ico/explorer.ico', zhName: "浏览器1",
+        icon: '/ico/clock.ico', url: '/ico/explorer.ico', zhName: "浏览器1", vuePath: `jz_set`,
+        iframeUrl: 'https://nstool.netease.com/',
         taskbar: true, desktop: true, show: false, content: false
     },
-    'explorer2': {
-        icon: '/ico/emms.ico', url: '/ico/explorer.ico', zhName: "浏览器2",
+    'emmsV2': {
+        icon: '/ico/emms.ico', url: '/ico/explorer.ico', zhName: "emms V2版", vuePath: `jz_set`,
+        iframeUrl: 'http://192.168.72.24:8002/',
         taskbar: true, desktop: true, show: false, content: false
     },
 });
+
+// 切换菜单显示
+const switch_menu_show = () => {
+    show_start_menu.value = !show_start_menu.value;
+};
 
 // 把窗口置于顶层的动作
 const set_active_window = (appName: string) => {
@@ -76,6 +111,7 @@ const set_active_window = (appName: string) => {
 
 // 打开应用
 const open_app= (appName: string) => {
+    selected_app.value = "";
     if (appList.value[appName].content == false){
         appList.value[appName].content = shallowRef(
             defineAsyncComponent(() => import(`./components/Window.vue`)) as any
@@ -127,9 +163,36 @@ const close_app = (appName: string) => {
     background-color: var(--desktop);
 }
 
-/* #wallpaper {
-    background-color: #424142;
-} */
+#wallpaper {
+    display: grid;
+    grid-auto-columns: 82px;
+    grid-auto-rows: 96px;
+    .desktop_app {
+        width: 64px;
+        height: 74px;
+        user-select: none;
+        position: relative;
+        img {
+            widows: 48px;
+            height: 48px;
+        };
+        a {
+            color: #fff;
+            display: block;
+            font-size: 12px;
+        };
+        &.selected::before {
+            content: "";
+            display: block;
+            position: absolute;
+            width: 64px;
+            height: 72px;
+            background-color: #0a246a7d;
+            pointer-events: none;
+            // z-index: 1;
+        }
+    }
+}
 
 #taskbar {
     height: 42px;

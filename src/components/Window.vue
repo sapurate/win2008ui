@@ -5,7 +5,8 @@
 
   }">
     
-    <div :id="appName+'Header'" class="dragHeader" :class="{activate: opened_app_list[opened_app_list.length-1]==appName}">
+    <div :id="appName+'Header'" class="dragHeader"
+    :class="{activate: opened_app_list[opened_app_list.length-1]==appName}">
       <span class="dragTitle"><b>{{ title }}</b></span>
       <div class="btn-group">
         <div class="el-icon-close shadow-btn" @click="mix_app(appName)">🗕</div>
@@ -14,7 +15,7 @@
       </div>
     </div>
     <div :id="appName+'Header2'" class="dragHeader2">
-      <input class="url" readonly :value="url + appName"></input>
+      <input class="url" readonly :value="'🖥︎ ▾ 计算机 ▾ 应用 ▾ ' + vuePath"></input>
       <el-button class="btn" style="margin-left: -23px; background: linear-gradient(#90CDA4, #229832, #90CDA4); border: 1px solid #B0E2BE;">
         ♻︎
       </el-button>
@@ -24,7 +25,10 @@
       </el-button>
     </div>
     <div :id="appName+'dragBody'" class="dragBody">
-      <slot name="content"></slot>
+      <!-- <slot name="content"> -->
+        <component v-if="url==''" :is="content"></component>
+        <iframe v-if="url!=''" :src="url" style="width: 100%; height: 100%;" frameborder="0"></iframe>
+      <!-- </slot> -->
     </div>
   
     <div class="unactivate" 
@@ -34,7 +38,7 @@
 </template>
    
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, shallowRef, defineAsyncComponent } from 'vue';
 
 // Define reactive properties
 // const isMove = ref(false);
@@ -63,8 +67,11 @@ const props = defineProps({
   },
   url: {
     type: String,
-    // default: () => window.location.pathname.replace("/", ">"),
-    default: "🖥︎ ▾ 计算机 ▾ 应用 ▾ ",
+    default: "",
+  },
+  vuePath: {
+    type: String,
+    default: null,
   },
   opened_app_list: {
     type: Array,
@@ -87,21 +94,34 @@ const startPosition = {
   top: props.opened_app_list.indexOf(props.appName)*20,
 };
 
+// 暂存窗口的left和top值，接触最大化后还原
+const tempPosition = ref({
+  left: "",
+  top: "",
+});
+
+// 窗口内的子组件
+const content = shallowRef(defineAsyncComponent(() => import(`./winapp/${props.vuePath}.vue`)));
+
 const max = () => {
   const dragBox = document.getElementById(props.appName+'Window');
   if (isMax.value) {
-    dragBox.style.left = "50%";
-    dragBox.style.top = "50%";
+    dragBox.style.left = tempPosition.value.left;
+    dragBox.style.top = tempPosition.value.top;
     isMax.value = false;
+    isMove.value = true;
   } else {
+    tempPosition.value.left = dragBox.style.left;
+    tempPosition.value.top = dragBox.style.top;
     dragBox.style.left = "0";
     dragBox.style.top = "0";
     isMax.value = true;
-  }
+    isMove.value = false;
+  };
 };
 
-// Emit
-const emit = defineEmits(['close']);
+// 是否可以拖动
+const isMove = ref(true);
 
 // Mounted hook
 onMounted(() => {
@@ -110,11 +130,19 @@ onMounted(() => {
   let x, y;
 
   drop.addEventListener('mousedown', (e) => {
-      // 如果现在是最大化状态，拖动标题栏将缩小
-    if (isMax.value) { return };
+      // 如果现在是最大化状态，禁止拖动
+    // if (isMax.value) { return };
+    if (!isMove.value) { return };
+    
     x = e.pageX - box.offsetLeft;
     y = e.pageY - box.offsetTop;
     document.addEventListener('mousemove', moveBox);
+  });
+
+  drop.addEventListener('dblclick', (e) => {
+    // 处理双击事件
+    isMove.value = false;
+    max();
   });
 
   document.addEventListener('mouseup', () => {
@@ -145,6 +173,7 @@ onMounted(() => {
   background-color: var(--cd1);
   border: 1px solid var(--cd1);
   padding: 1px;
+  user-select: none;
   &.max {
     // transition: all .5s;
     width: unset !important;
@@ -239,7 +268,8 @@ onMounted(() => {
   
   .dragBody {
     width: 100%;
-    flex: 1;
+    height: calc(100% - 57px);
+    // flex: 1;
     background-color: var(--cd0);
     box-sizing: border-box;
     // border-left: 1px solid var(--cd1);

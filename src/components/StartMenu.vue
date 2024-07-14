@@ -1,5 +1,5 @@
 <template>
-<div id="start_menu" class="shadow-window" v-show="start_menu_show">
+<div id="start_menu" class="shadow-window" v-show="start_menu_show" @blur="switch_show">
     <div class="lr-box">
         <div class="l-box">
             <!-- <div class="app" @click="applist.app ++">111</div> -->
@@ -43,6 +43,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 const start_menu_show = ref(true)
+const props = defineProps({
+    switch_show: { type: Function, default: null },
+})
 
 const app_data = [
     { name: '记事本', ref: 'notepad', src: '/src/components/App/Notepad.vue', is_bar: true },
