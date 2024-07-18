@@ -1,17 +1,15 @@
 <template>
-  <div :id="appName+'Window'" id="dragAssembly"  class="dragAssembly shadow-window" 
-    :class="{max: isMax, activate: opened_app_list[opened_app_list.length-1]==appName}" 
-    :style="{ width: w, height: h, zIndex: opened_app_list.indexOf(appName)+70, 
-
-  }">
+  <div :id="appName+'Window'" class="dragAssembly shadow-window" tabindex="-1" 
+    :class="{max: isMax, activate: active_app_list[active_app_list.length-1]==appName}" 
+    :style="{ width: w, height: h, zIndex: active_app_list.indexOf(appName)+70, }">
     
     <div :id="appName+'Header'" class="dragHeader"
-    :class="{activate: opened_app_list[opened_app_list.length-1]==appName}">
+    :class="{activate: active_app_list[active_app_list.length-1]==appName}">
       <span class="dragTitle"><b>{{ title }}</b></span>
       <div class="btn-group">
         <div class="el-icon-close shadow-btn" @click="mix_app(appName)">🗕</div>
         <div class="el-icon-close shadow-btn" @click="max" style="margin-left: 3px;">🗖</div>
-        <div class="el-icon-close shadow-btn" @click="close_app(appName)">×</div>
+        <div class="el-icon-close shadow-btn" @click="close_app(appName)">&#10005</div>
       </div>
     </div>
     <div :id="appName+'Header2'" class="dragHeader2">
@@ -32,8 +30,8 @@
     </div>
   
     <div class="unactivate" 
-      v-show="opened_app_list[opened_app_list.length-1]!=appName"
-      @click="set_active_winodw(appName)"></div>
+      v-show="active_app_list[active_app_list.length-1]!=appName"
+      @mousedown="set_active_winodw(appName)"></div>
   </div>
 </template>
    
@@ -73,7 +71,7 @@ const props = defineProps({
     type: String,
     default: null,
   },
-  opened_app_list: {
+  active_app_list: {
     type: Array,
     default: null,
   },
@@ -90,8 +88,8 @@ const props = defineProps({
 
 // 设定初始的left和top值，赋值后不会再变
 const startPosition = {
-  left: props.opened_app_list.indexOf(props.appName)*20,
-  top: props.opened_app_list.indexOf(props.appName)*20,
+  left: props.active_app_list.indexOf(props.appName)*20,
+  top: props.active_app_list.indexOf(props.appName)*20,
 };
 
 // 暂存窗口的left和top值，接触最大化后还原
@@ -153,6 +151,8 @@ onMounted(() => {
     box.style.left = `${e.pageX - x}px`;
     box.style.top = `${e.pageY - y}px`;
   };
+
+  document.getElementById(props.appName+'Window')?.focus();
 });
 </script>
   
@@ -160,6 +160,9 @@ onMounted(() => {
 * {
   font-size: 13px;
   font-family: 'Times New Roman', Times, serif;
+  &:focus {
+    outline: none;
+  }
 }
 
 .dragAssembly {
@@ -202,7 +205,7 @@ onMounted(() => {
       background: linear-gradient(to right, #17246b, #A6CAF0);
       color: #fff;
     }
-  
+
     .dragTitle {
       font-size: 13px;
       font-family: 'Times New Roman', Times, serif;

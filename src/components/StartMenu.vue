@@ -1,19 +1,27 @@
 <template>
-<div id="start_menu" class="shadow-window" v-show="start_menu_show" @blur="switch_show">
+     <!-- @blur="switch_menu_show" -->
+<div id="start_menu_box" class="shadow-window" tabindex="-1" @blur="switch_menu_show">
     <div class="lr-box">
         <div class="l-box">
             <!-- <div class="app" @click="applist.app ++">111</div> -->
-            <span></span>
-            <template v-for="app in app_data">
-                <div v-if="app.is_bar" class="app" :key="app.ref" 
-                    @click="start_menu_show=false,this.$router.push(app.src),!openedApps.includes(app.ref)&&openedApps.push(app.ref)"
-                    :style="{backgroundImage: 'url(/src/assets/img/app/' + app.ref + '.ico)',backgroundSize: '32px 32px'}">
-                    {{ app.name }}
+            <!-- <span></span> -->
+            <template v-for="item in menu_app_list">
+                <div class="app"
+                    @click="open_app(item)" :style="{backgroundImage: 'url('+appList[item].icon+')',backgroundSize: '32px 32px'}">
+                    {{ appList[item].zhName }}
                 </div>
             </template>
             <div class="zw"></div>
             <span></span>
-            <div class="app show_all_apps" >所有程序</div>
+            <!-- 副菜单 -->
+            <div class="app" id="show_all_apps" @mouseover="showSubMenu = true" @mouseout="showSubMenu = false">
+                <div id="sub_menu" class="shadow-window" v-show="showSubMenu">
+                    <div v-for="item, appName in appList" class="sub_menu_app" @click="open_app(appName)">
+                        <img :src="item.icon" :alt="item.zhName">
+                        <a>{{item.zhName}}</a>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="r-box">
             <div class="user_pic"><img src="/ico/user_pic.png" alt="user_pic"></div>
@@ -41,32 +49,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-const start_menu_show = ref(true)
+import { ref, onMounted } from 'vue'
+
+// const start_menu = ref(null as any);
+const showSubMenu  = ref(false);
 const props = defineProps({
-    switch_show: { type: Function, default: null },
-})
+    switch_menu_show: { type: Function as any },
+    open_app: { type: Function as any },
+    appList: { type: {} as any },
+    menu_app_list: { type: [] as any },
+});
 
-const app_data = [
-    { name: '记事本', ref: 'notepad', src: '/src/components/App/Notepad.vue', is_bar: true },
-    { name: '计算器', ref: 'calculator', src: '/src/components/App/Calculator.vue', is_bar: true },
-    { name: '画图', ref: 'paint', src: '/src/components/App/Paint.vue', is_bar: true },
-]
+const user_name = ref('');
 
-const user_name = ref('')
-const openedApps = ref([] as any)
-
-const search_app_input = ref('')
+const search_app_input = ref('');
 const logout = () => {
     localStorage.removeItem('user_name')
     localStorage.removeItem('openedApps')
     window.location.reload()
-}
+};
 
+onMounted(() => {
+    document.getElementById('start_menu_box')?.focus();
+});
 </script>
 
 <style scoped lang="less">
-#start_menu {
+#start_menu_box {
     display: flex;
     cursor: default;
     outline: none;
@@ -76,7 +85,7 @@ const logout = () => {
     padding: 2px;
     left: 2px;
     bottom: 45px;
-    height: 612px;
+    height: 453px;
     box-sizing: border-box;
     z-index: 99;
     font-size: 12px;
@@ -97,20 +106,51 @@ const logout = () => {
             display: flex;
             flex-direction: column;
             .app {
-                height: 35px;
-                line-height: 35px;
+                height: 36px;
+                line-height: 36px;
                 margin: 1px 2px 1px 0;
-                padding-left: 37px;
+                padding-left: 40px;
                 text-align: left;
                 position: relative;
                 background-position: 2px center;
                 background-repeat: no-repeat;
-                &.show_all_apps {
+                &#show_all_apps {
                     margin: 0;
+                    position: relative;
+                    height: 28px;
                     &::before {
-                        content: '▸';
+                        white-space: pre;
+                        content: '▸所有程序';
                         position: absolute;
+                        line-height: 28px;
                         left: 0;
+                    };
+                    #sub_menu {
+                        position: absolute;
+                        display: flex;
+                        flex-direction: column;
+                        padding: 3px;
+                        left: 240px;
+                        bottom: 0;
+                        background-color: var(--cd1);
+                        .sub_menu_app {
+                            width: 150px;
+                            display: flex;
+                            align-items: center;
+                            color: #000;
+                            padding: 2px 5px;
+                            height: 25px;
+                            img {
+                                height: 20px;
+                            };
+                            a {
+                                margin-left: 5px;
+                            };
+                            &:hover {
+                                background-color: var(--cd4);
+                                color: var(--cd0);
+                            };
+                        };
                     };
                 }
                 &:hover {
@@ -152,7 +192,7 @@ const logout = () => {
         };
     }
     .b-box {
-        height: 32px;
+        height: 31px;
         border-top: solid 1px var(--cd0);
         display: flex;
         align-items: center;
