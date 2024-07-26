@@ -34,6 +34,14 @@
             </div>
             </template>
         </div>
+        <!-- 任务栏右下角部分 -->
+        <div id="taskbar-right">
+            <div id="show-time" @click="open_app('showDate')">
+                {{ show_time }}<br>
+                {{ show_date }}
+            </div>
+            <div id="show-desktop" @click="active_app_list=[]"></div>
+        </div>
     </el-footer>
 
     <!-- 应用窗口 -->
@@ -65,7 +73,7 @@
 <script setup lang="ts">
 // import Window from "./components/Window.vue";
 // import StartMenu from "./components/StartMenu.vue";
-import { ref, shallowRef, defineAsyncComponent } from "vue";
+import { ref, shallowRef, onMounted, defineAsyncComponent } from "vue";
 
 // 开始菜单，默认为空
 const start_menu = ref({
@@ -76,6 +84,10 @@ const start_menu = ref({
 
 // 桌面被选中的图标
 const selected_app = ref('');
+
+// 时间
+const show_time = ref('');
+const show_date = ref('');
 
 // 桌面图标列表
 const desktop_app_list = ref(['computer', 'ie', 'explorer1', 'emmsV2']);
@@ -98,8 +110,16 @@ const appList = ref({
         iframeUrl: '', content: false
     },
     'ie': {
-        icon: '/ico/ie.ico', zhName: "Internet Explorer", vuePath: `jz_set`,
-        iframeUrl: 'http://192.168.72.24', content: false
+        icon: '/ico/ie.ico', zhName: "Internet Explorer", vuePath: `jz_nav`,
+        iframeUrl: '', content: false
+    },
+    'showDate': {
+        icon: '/ico/clock.ico', zhName: "万年历", vuePath: ``,
+        iframeUrl: 'http://yun.rili.cn/wnl/index.html', content: false
+    },
+    'jz_nav': {
+        icon: '/ico/jz_nav.ico', zhName: "网易云音乐", vuePath: `jz_nav`,
+        iframeUrl: 'https://music.163.com/', content: false
     },
     'explorer1': {
         icon: '/ico/clock.ico', zhName: "浏览器1", vuePath: `jz_set`,
@@ -153,6 +173,25 @@ const open_app= (appName: string) => {
     };
 };
 
+const showTime = () => {
+    const now_time = new Date();
+    const year = now_time.getFullYear();
+    const month = ('0' + (now_time.getMonth() + 1)).slice(-2);
+    const day = ('0' + now_time.getDate()).slice(-2);
+    const hours = ('0' + now_time.getHours()).slice(-2);
+    const minutes = ('0' + now_time.getMinutes()).slice(-2);
+    const arr_work = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+    const week = arr_work[now_time.getDay()];
+    
+    show_time.value = `${hours}:${minutes}`;
+    show_date.value = `${year}/${month}/${day}`;
+    // 更新时间，每分钟更新一次
+    setTimeout(showTime, 60000);
+};
+
+onMounted(() => {
+    showTime();
+});
 
 // 最小化
 const mix_app = (appName: string) => {
@@ -285,8 +324,39 @@ const close_app = (appName: string) => {
     };
     #taskbar_app_ground {
         display: flex;
+        flex: 1;
         margin-left: 9px;
-    }
+    };
+    #taskbar-right {
+        height: 38px;
+        border-right: solid 1px var(--cd0);
+        border-bottom: solid 1px var(--cd0);
+        border-top: solid 1px var(--cd2);
+        border-left: solid 1px var(--cd2);
+        box-sizing: border-box;
+        padding-left: 6px;
+        display: flex;
+        div {
+            margin: 0 2px;
+            height: 36px;
+            box-sizing: border-box;
+        };
+        #show-time {
+            font-size: 12px;
+            cursor: default;
+        };
+        #show-desktop {
+            width: 18px;
+            background: url(/ico/show_desktop.png) no-repeat center center;
+            &:hover {
+                border-right: solid 1px var(--cd2);
+                border-bottom: solid 1px var(--cd2);
+                border-top: solid 1px var(--cd0);
+                border-left: solid 1px var(--cd0);
+            }
+        };
+    };
+
 }
 
 // .shadow-right-bottom {

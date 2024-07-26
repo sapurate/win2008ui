@@ -28,7 +28,7 @@
             <div class="app">{{ user_name }}</div>
             <div class="app">文档</div>
             <span></span>
-            <div class="app">计算机</div>
+            <div class="app" @click="open_app('computer')">计算机</div>
             <div class="app">网络</div>
             <span></span>
             <div class="app">控制面板</div>

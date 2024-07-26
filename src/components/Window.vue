@@ -14,11 +14,11 @@
     </div>
     <div :id="appName+'Header2'" class="dragHeader2">
       <input class="url" readonly :value="'🖥︎ ▾ 计算机 ▾ 应用 ▾ ' + vuePath"></input>
-      <el-button class="btn" style="margin-left: -23px; background: linear-gradient(#90CDA4, #229832, #90CDA4); border: 1px solid #B0E2BE;">
+      <el-button class="btn" @click="import_content" style="margin-left: -23px; background: linear-gradient(#90CDA4, #229832, #90CDA4); border: 1px solid #B0E2BE;">
         ♻︎
       </el-button>
-      <input class="search shadow-window-1"></input>
-      <el-button class="btn" style="margin: 0 1px; background: linear-gradient(#AEB5E4, #2650AC, #AEB5E4); border: 1px solid #CBD1FA;" >
+      <input class="search shadow-window-1" v-model="searchText" @keyup.enter="searchOnBaidu"></input>
+      <el-button class="btn" @click="searchOnBaidu" style="margin: 0 1px; background: linear-gradient(#AEB5E4, #2650AC, #AEB5E4); border: 1px solid #CBD1FA;" >
         🔍︎
       </el-button>
     </div>
@@ -98,8 +98,12 @@ const tempPosition = ref({
   top: "",
 });
 
-// 窗口内的子组件
-const content = shallowRef(defineAsyncComponent(() => import(`./winapp/${props.vuePath}.vue`)));
+const content = shallowRef();
+// 加载窗口内的子组件
+const import_content = () => {
+  content.value = defineAsyncComponent(() => import(`./winapp/${props.vuePath}.vue`));
+  // confirm('窗口内容加载成功！');
+};
 
 const max = () => {
   const dragBox = document.getElementById(props.appName+'Window');
@@ -118,6 +122,12 @@ const max = () => {
   };
 };
 
+const searchText = ref('');
+const searchOnBaidu = () => {
+  const url = `https://www.baidu.com/s?wd=${encodeURIComponent(searchText.value)}`;
+  window.open(url, '_blank');
+};
+
 // 是否可以拖动
 const isMove = ref(true);
 
@@ -128,8 +138,19 @@ onMounted(() => {
   let x, y;
 
   drop.addEventListener('mousedown', (e) => {
-      // 如果现在是最大化状态，禁止拖动
+    // 如果现在是最大化状态，禁止拖动
     // if (isMax.value) { return };
+    if (!isMove.value) { return };
+    
+    x = e.pageX - box.offsetLeft;
+    y = e.pageY - box.offsetTop;
+    document.addEventListener('mousemove', moveBox);
+  });
+
+  box.addEventListener('mousedown', (e) => {
+    // 如果alt按下则点哪里都能拖动
+    if (!e.altKey) { return };
+    // 如果现在是最大化状态，禁止拖动
     if (!isMove.value) { return };
     
     x = e.pageX - box.offsetLeft;
@@ -151,6 +172,8 @@ onMounted(() => {
     box.style.left = `${e.pageX - x}px`;
     box.style.top = `${e.pageY - y}px`;
   };
+
+  import_content();
 
   document.getElementById(props.appName+'Window')?.focus();
 });
