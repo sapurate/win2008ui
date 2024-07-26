@@ -1,5 +1,10 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { setupBuild } from './build'
+
+// eslint-disable-next-line no-control-regex 
+const INVALID_CHAR_REGEX = /[\u0000-\u001F"#$&*+,:;<=>?[\]^`{|}\u007F]/g;
+const DRIVE_LETTER_REGEX = /^[a-z]:/i;
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -36,7 +41,5 @@ export default defineConfig({
   plugins: [
     vue(),
   ],
-  // build: {
-  //   base: '/win2008ui/', // 设置base路径为/my-app/
-  // },
+  build: setupBuild(),
 })
