@@ -102,31 +102,31 @@ const active_app_list = ref([] as any);
 // 最重要的：应用列表
 const appList = ref({
     'computer': {
-        icon: '/ico/computer.ico', zhName: "计算机", vuePath: `jz_set`,
+        icon: './ico/computer.ico', zhName: "计算机", vuePath: `jz_set`,
         iframeUrl: '', content: false
     },
     'config': {
-        icon: '/ico/config.ico', zhName: "配置", vuePath: `jz_set`,
+        icon: './ico/config.ico', zhName: "配置", vuePath: `jz_set`,
         iframeUrl: '', content: false
     },
     'ie': {
-        icon: '/ico/ie.ico', zhName: "Internet Explorer", vuePath: `jz_nav`,
+        icon: './ico/ie.ico', zhName: "Internet Explorer", vuePath: `jz_nav`,
         iframeUrl: '', content: false
     },
     'showDate': {
-        icon: '/ico/clock.ico', zhName: "万年历", vuePath: ``,
+        icon: './ico/clock.ico', zhName: "万年历", vuePath: ``,
         iframeUrl: 'http://yun.rili.cn/wnl/index.html', content: false
     },
     'jz_nav': {
-        icon: '/ico/jz_nav.ico', zhName: "网易云音乐", vuePath: `jz_nav`,
+        icon: './ico/jz_nav.ico', zhName: "网易云音乐", vuePath: `jz_nav`,
         iframeUrl: 'https://music.163.com/', content: false
     },
     'explorer1': {
-        icon: '/ico/clock.ico', zhName: "浏览器1", vuePath: `jz_set`,
+        icon: './ico/clock.ico', zhName: "浏览器1", vuePath: `jz_set`,
         iframeUrl: 'https://nstool.netease.com/', content: false
     },
     'emmsV2': {
-        icon: '/ico/emms.ico', zhName: "emms V2版", vuePath: `jz_set`,
+        icon: './ico/emms.ico', zhName: "emms V2版", vuePath: `jz_set`,
         iframeUrl: 'http://192.168.72.24:8002/', content: false
     },
 });
