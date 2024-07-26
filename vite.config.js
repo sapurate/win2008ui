@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/win2008ui/',
   server: {
     port: 80,
     host: '0.0.0.0',
@@ -35,4 +36,7 @@ export default defineConfig({
   plugins: [
     vue(),
   ],
+  // build: {
+  //   base: '/win2008ui/', // 设置base路径为/my-app/
+  // },
 })
